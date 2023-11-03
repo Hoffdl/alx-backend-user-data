@@ -90,9 +90,9 @@ def main():
     logger = get_logger()
     cursor = db.cursor()
     cursor.execute("SELECT * FROM users;")
-    fields = cursor.colum_names
+    fields = cursor.column_names
     for row in cursor:
-        message = "".join("{}={}}; ".format(k, v) for k, v in zip(fields, row))
+        message = "".join("{}={}; ".format(k, v) for k, v in zip(fields, row))
         logger.info(message.strip())
     cursor.close()
     db.close()
