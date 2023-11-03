@@ -21,7 +21,7 @@ def filter_datum(fields: List[str], redaction: str,
         separator (str): the character separating the fields
     """
     for field in fields:
-        message = re.sub(field+'=*?'+separator,
+        message = re.sub(field+'=.*?'+separator,
                          field+'='+redaction+separator, message)
         return message
 
