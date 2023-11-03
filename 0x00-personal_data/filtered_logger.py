@@ -27,7 +27,7 @@ def filter_datum(fields: List[str], redaction: str,
 
 
 class RedactingFormatter(logging.Formatter):
-    """Redacting Formatter class """
+    """Redacting Formatter class"""
 
     REDACTION = "***"
     FORMAT = "[HOLBERTON] %(name)s %(levelname)s %(asctime)-15s: %(message)s"
@@ -87,7 +87,7 @@ def main():
     main entry point
     """
     db = get_db()
-    logger = get_logger
+    logger = get_logger()
     cursor = db.cursor()
     cursor.execute("SELECT * FROM users;")
     fields = cursor.colum_names
