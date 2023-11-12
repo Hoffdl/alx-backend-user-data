@@ -1,46 +1,44 @@
 #!/usr/bin/env python3
-""" Module of Users views
+""" Module of Index views
 """
-import os
-from flask import jsonify, request
+from flask import jsonify, abort
 from api.v1.views import app_views
-from models.user import User
 
 
-@app_views.route('/auth_session/login', methods=['POST'], strict_slashes=False)
-def auth_session():
-    """
-    Handle user login
+@app_views.route('/unauthorized', methods=['GET'], strict_slashes=False)
+def authorized() -> str:
+    """ GET /api/v1/unauthorized
     Return:
-        dictionary representation of user if found else error message
+        - raise a 401 error
     """
-    email = request.form.get('email')
-    password = request.form.get('password')
-    if email is None or email == '':
-        return jsonify({"error": "email missing"}), 400
-    if password is None or password == '':
-        return jsonify({"error": "password missing"}), 400
-    users = User.search({"email": email})
-    if not users or users == []:
-        return jsonify({"error": "no user found for this email"}), 404
-    for user in users:
-        if user.is_valid_password(password):
-            from api.v1.app import auth
-            session_id = auth.create_session(user.id)
-            resp = jsonify(user.to_json())
-            session_name = os.getenv('SESSION_NAME')
-            resp.set_cookie(session_name, session_id)
-            return resp
-    return jsonify({"error": "wrong password"}), 401
+    abort(401, description="Unauthorized")
 
 
-@app_views.route('/auth_session/logout', methods=['DELETE'],
-                 strict_slashes=False)
-def handle_logout():
+@app_views.route('/forbidden', methods=['GET'], strict_slashes=False)
+def forbid() -> str:
+    """ GET /api/v1/forbidden
+    Return:
+        - raise a 403 error
     """
-    Handle user logout
+    abort(403, description="Forbidden")
+
+
+@app_views.route('/status', methods=['GET'], strict_slashes=False)
+def status() -> str:
+    """ GET /api/v1/status
+    Return:
+      - the status of the API
     """
-    from api.v1.app import auth
-    if auth.destroy_session(request):
-        return jsonify({}), 200
-    abort(404)
+    return jsonify({"status": "OK"})
+
+
+@app_views.route('/stats/', strict_slashes=False)
+def stats() -> str:
+    """ GET /api/v1/stats
+    Return:
+      - the number of each objects
+    """
+    from models.user import User
+    stats = {}
+    stats['users'] = User.count()
+    return jsonify(stats)
