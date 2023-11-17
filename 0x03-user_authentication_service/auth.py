@@ -22,7 +22,7 @@ def _hash_password(password: str) -> bytes:
     Args:
         password (str): password in string format
     """
-    passwd = password.encoded('utf-8')
+    passwd = password.encode('utf-8')
     return bcrypt.hashpw(passwd, bcrypt.gensalt())
 
 
@@ -34,8 +34,7 @@ def _generate_uuid() -> str:
 
 
 class Auth:
-    """
-    Auth class to interact with the authentication database.
+    """Auth class to interact with the authentication database.
     """
 
     def __init__(self) -> None:
@@ -48,12 +47,16 @@ class Auth:
             email (str): new user's email address
             password (str): new user's password
         Return:
-            if no user with given email exits, return newly created user
+            if no user with given email exists, return newly created user
             else raise ValueError
         """
         try:
             self._db.find_user_by(email=email)
-        except NoResult
+        except NoResultFound:
+            hashed = _hash_password(password)
+            usr = self._db.add_user(email, hashed)
+            return usr
+        raise ValueError(f"User {email} already exists")
 
     def valid_login(self, email: str, password: str) -> bool:
         """
@@ -63,7 +66,7 @@ class Auth:
             email (str): user's email address
             password (str): user's password
         Return:
-            True if credentials are correct, else false
+            True if credentials are correct, else False
         """
         try:
             user = self._db.find_user_by(email=email)
